@@ -1,6 +1,6 @@
 create table dianping
 (
-  id int PRIMARY KEY,
+  id int auto_increment PRIMARY KEY,
   shopname varchar(100),
   shopurl varchar(300),
   shoplevel varchar(45),

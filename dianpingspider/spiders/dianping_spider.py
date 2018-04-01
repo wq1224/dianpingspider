@@ -19,7 +19,6 @@ class DianpingSpider(Spider):
 
     def parse_first(self,response):
     	selector = Selector(response)
-        #pdb.set_trace()
         pg = 0
         pages = selector.xpath('//div[@class="page"]/a/@data-ga-page').extract()
 
@@ -43,14 +42,13 @@ class DianpingSpider(Spider):
 
         div = selector.xpath('//div[@id="shop-all-list"]/ul/li')
 
-
         for dd in div:
             shopnames = dd.xpath('div[2]/div[1]/a[1]/h4/text()').extract()
             item['shopname']=shopnames[0]
             print shopnames[0]
 
             shopurls = dd.xpath('div[2]/div[1]/a[1]/@href').extract()
-            item['shopurl'] = 'http://www.dianping.com'+str(shopurls[0])
+            item['shopurl'] = str(shopurls[0])
 
             shoplevels = dd.xpath('div[2]/div[2]/span/@title').extract()
             item['shoplevel'] = shoplevels[0]
@@ -62,9 +60,10 @@ class DianpingSpider(Spider):
                 item['commentnum'] = '0'
 
             avgcosts = dd.xpath('div[2]/div[2]/a[2]/b/text()').extract()
-
+            #pdb.set_trace()
+            # solve unicode problem see https://gitee.com/ldshuang/imax-spider/commit/1d05d7bafdf7758f7b422cc1133abf493bf55086
             if len(avgcosts) > 0:
-                item['avgcost'] = filter(str.isdigit, str(avgcosts[0]))
+                item['avgcost'] = filter(str.isdigit, str(avgcosts[0].encode('utf-8')))
 
             else:
                 item['avgcost'] = '0'
