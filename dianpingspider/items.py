@@ -22,3 +22,6 @@ class DianpingItem(scrapy.Item):
     service = Field()
     foodtype = Field()
     loc = Field()
+    poi = Field()
+    addr = Field()
+    label = Field()

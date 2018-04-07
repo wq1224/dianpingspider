@@ -10,5 +10,8 @@ create table dianping
   envi VARCHAR(45),
   service VARCHAR(45),
   foodtype VARCHAR(45),
-  loc VARCHAR(100)
+  loc VARCHAR(30),
+  poi VARCHAR(60),
+  addr VARCHAR(150),
+  label VARCHAR(300)
  )

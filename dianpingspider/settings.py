@@ -21,7 +21,10 @@ NEWSPIDER_MODULE = 'dianpingspider.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 HTTPERROR_ALLOWED_CODES = [403]
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.54 Safari/536.5'
+DEFAULT_REQUEST_HEADERS = {
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
+}
 DOWNLOAD_DELAY = 1 # 0.5  250 ms of delay
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -37,9 +40,10 @@ MYSQL_DBNAME = 'dianping'         #数据库名字，请修改
 MYSQL_USER = 'root'             #数据库账号，请修改
 MYSQL_PASSWD = ''         #数据库密码，请修改
 MYSQL_PORT = 3306               #数据库端口，在dbhelper中使用
-# DOWNLOADER_MIDDLEWARES = {
-#     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1
-# }
+DOWNLOADER_MIDDLEWARES = {
+    'dianpingspider.middlewares.DianpingspiderDownloaderMiddleware':543
+    #'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware':None
+}
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs

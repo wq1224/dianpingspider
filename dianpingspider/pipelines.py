@@ -9,6 +9,7 @@ import MySQLdb
 import MySQLdb.cursors
 import json
 import copy
+import pdb
 
 class DianpingspiderPipeline(object):
 	# collection_name = 'music'
@@ -57,15 +58,18 @@ class DianpingspiderPipeline(object):
 
 	# pipeline默认调用
 	def process_item(self, item, spider):
-		asynItem = copy.deepcopy(item) 
+		asynItem = copy.deepcopy(item)
 		query = self.dbpool.runInteraction(self._conditional_insert, asynItem)  # 调用插入的方法
 		query.addErrback(self._handle_error, asynItem, spider)  # 调用异常处理方法
 		return item
 
 	# 写入数据库中
 	def _conditional_insert(self, tx, item):
-		sql = "insert into dianping(shopname,shoplevel,shopurl,commentnum,avgcost,taste,envi,service,foodtype,loc) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-		params = (item['shopname'], item['shoplevel'], item['shopurl'], item['commentnum'],item['avgcost'],item['taste'],item['envi'],item['service'],item['foodtype'],item['loc'])
+		print "writing to item: " + item['shopname']
+		sql = "insert into dianping(shopname,shoplevel,shopurl,commentnum,avgcost,taste,envi,service,foodtype,loc,poi,addr,label) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+		#sql = "insert into dianping(shopname,shoplevel,shopurl,commentnum,avgcost,taste,envi,service,foodtype,loc) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+		params = (item['shopname'], item['shoplevel'], item['shopurl'], item['commentnum'],item['avgcost'],item['taste'],item['envi'],item['service'],item['foodtype'],item['loc'],item['poi'],item['addr'],','.join(item['label']))
+		#params = (item['shopname'], item['shoplevel'], item['shopurl'], item['commentnum'],item['avgcost'],item['taste'],item['envi'],item['service'],item['foodtype'],item['loc'])
 		tx.execute(sql, params)
 
 	# 错误处理方法

@@ -6,6 +6,12 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from selenium import webdriver
+from scrapy.http import HtmlResponse
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import time
+import pdb
 
 
 class DianpingspiderSpiderMiddleware(object):
@@ -71,6 +77,37 @@ class DianpingspiderDownloaderMiddleware(object):
     def process_request(self, request, spider):
         # Called for each request that goes through the downloader
         # middleware.
+        # injected_javascript = (
+        #     'Object.defineProperty(navigator, "webdriver", {'
+        #     'value: false,'
+        #     'configurable: true'
+        #     '});'
+        # )
+
+        if spider.name == "dianping" and request.meta.has_key('phantomjs'):
+            print "Chrome webdriver is starting..."
+            user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
+            # dcap = dict(DesiredCapabilities.PHANTOMJS)
+            # dcap["phantomjs.page.settings.userAgent"] = user_agent
+            # driver = webdriver.PhantomJS(desired_capabilities=dcap)
+            # driver = webdriver.Firefox()
+            options = Options()
+            options.add_argument('--headless')
+            #options.add_argument('--disable-gpu')
+            options.add_argument("--proxy-server=localhost:8080");
+            driver = webdriver.Chrome(executable_path='/Users/i314017/study/scrapy/dianpingspider/chromedriver',chrome_options=options)
+
+            driver.get(request.url)
+            #driver.execute_script(injected_javascript)
+            #time.sleep(2)
+            #js = "var q=document.documentElement.scrollTop=10000" 
+            #driver.execute_script(js) #可执行js，模仿用户操作。此处为将页面拉至最底端。
+            #driver.save_screenshot('dianping.png')
+            body = driver.page_source
+            print ("访问"+request.url)
+            return HtmlResponse(driver.current_url, body=body, encoding='utf-8', request=request)
+        else:
+            return None
 
         # Must either:
         # - return None: continue processing this request
@@ -78,7 +115,6 @@ class DianpingspiderDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        return None
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
