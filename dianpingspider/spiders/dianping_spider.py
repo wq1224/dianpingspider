@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from scrapy.spiders import Spider
 from scrapy.selector import Selector
 from scrapy.http import Request
@@ -6,6 +7,9 @@ import time
 import sys
 import pdb
 import copy
+from twisted.enterprise import adbapi
+import MySQLdb
+import MySQLdb.cursors
 
 
 class DianpingSpider(Spider):
@@ -13,7 +17,6 @@ class DianpingSpider(Spider):
 	allowed_domains = ['dianping.com']
 	start_urls = ['http://www.dianping.com']
 	#['http://www.dianping.com/shanghai/ch10/r8167']
-
 
 	def parse(self, response):
 		#yield Request("http://www.dianping.com/shop/97572936",callback=self.parse_single_shop)
@@ -33,6 +36,8 @@ class DianpingSpider(Spider):
 
 		for p in range(1,pg):
 		    ul = url+'p'+str(p)
+		    #using this way is much faster than chrome headless, so make it slower
+		    #time.sleep(5)
 		    yield Request(ul,callback=self.parse_list)
 
 	def parse_list(self, response):
@@ -93,22 +98,48 @@ class DianpingSpider(Spider):
 			addrs = dd.xpath('div[2]/div[3]/span/text()').extract()
 			item['addr'] = addrs[0]
 
-			yield Request(item['shopurl'], meta={'item':copy.deepcopy(item), 'phantomjs':True}, callback=self.parse_single_shop)
+			#sometimes ip is banned by dianping, use this way to continue work
+			if not self.hasResult(item['shopurl']):
+				#time.sleep(3)
+				yield Request(item['shopurl'], meta={'item':copy.deepcopy(item), 'phantomjs':True}, callback=self.parse_single_shop)
+
+	def hasResult(self,url):
+		settings = self.settings
+		dbparams = dict(
+			host=settings['MYSQL_HOST'],  # 读取settings中的配置
+			db=settings['MYSQL_DBNAME'],
+			user=settings['MYSQL_USER'],
+			passwd=settings['MYSQL_PASSWD']
+		)
+		db = MySQLdb.connect(dbparams['host'], dbparams['user'], dbparams['passwd'], dbparams['db'], charset='utf8' )
+		cursor = db.cursor()
+		sql = "select * from dianping where shopurl='%s'" % url
+		try:
+			# 执行SQL语句
+			cursor.execute(sql)
+			# 获取所有记录列表
+			results = cursor.fetchall()
+			if len(results) > 0:
+				return True		
+		except:
+		   print "Error: unable to fecth data"
+		db.close()
+		return False
 
 	def parse_single_shop(self, response):
 		item = response.meta['item']
 		selector = Selector(response)
 
 		# get comment label
+		item['label'] = []
 		commentdiv = selector.xpath('//div[@id="summaryfilter-wrapper"]/div/div[@class="content"]/span')
 		if len(commentdiv) > 0:
-			labels = []
 			for labelspan in commentdiv:
 				label = labelspan.xpath('a/text()').extract()
-				labels.append(label[0])
-			item['label'] = labels
+				item['label'].append(label[0])
 
 		# get map poi
+		item['poi'] = ""
 		mapsrc = selector.xpath('//div[@id="map"]/img/@src').extract()
 		if len(mapsrc) > 0 :
 			mapsrc = mapsrc[0]

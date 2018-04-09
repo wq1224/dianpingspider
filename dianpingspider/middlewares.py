@@ -66,11 +66,24 @@ class DianpingspiderDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
+    def __init__(self, driver):
+        self.driver = driver
 
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
-        s = cls()
+        user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
+        # dcap = dict(DesiredCapabilities.PHANTOMJS)
+        # dcap["phantomjs.page.settings.userAgent"] = user_agent
+        # driver = webdriver.PhantomJS(desired_capabilities=dcap)
+        # driver = webdriver.Firefox()
+        options = Options()
+        #options.add_argument('--headless')
+        #options.add_argument('--disable-gpu')
+        options.add_argument("--proxy-server=localhost:8080");
+        driver = webdriver.Chrome(executable_path='/Users/i314017/study/scrapy/dianpingspider/chromedriver',chrome_options=options)
+
+        s = cls(driver)
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
 
@@ -86,26 +99,17 @@ class DianpingspiderDownloaderMiddleware(object):
 
         if spider.name == "dianping" and request.meta.has_key('phantomjs'):
             print "Chrome webdriver is starting..."
-            user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
-            # dcap = dict(DesiredCapabilities.PHANTOMJS)
-            # dcap["phantomjs.page.settings.userAgent"] = user_agent
-            # driver = webdriver.PhantomJS(desired_capabilities=dcap)
-            # driver = webdriver.Firefox()
-            options = Options()
-            options.add_argument('--headless')
-            #options.add_argument('--disable-gpu')
-            options.add_argument("--proxy-server=localhost:8080");
-            driver = webdriver.Chrome(executable_path='/Users/i314017/study/scrapy/dianpingspider/chromedriver',chrome_options=options)
-
-            driver.get(request.url)
+            self.driver.get(request.url)
             #driver.execute_script(injected_javascript)
-            #time.sleep(2)
+            #if self.driver.current_url.index("verify") > 0:
+            #    time.sleep(5)
             #js = "var q=document.documentElement.scrollTop=10000" 
             #driver.execute_script(js) #可执行js，模仿用户操作。此处为将页面拉至最底端。
             #driver.save_screenshot('dianping.png')
-            body = driver.page_source
+            pdb.set_trace()
+            body = self.driver.page_source
             print ("访问"+request.url)
-            return HtmlResponse(driver.current_url, body=body, encoding='utf-8', request=request)
+            return HtmlResponse(self.driver.current_url, body=body, encoding='utf-8', request=request)
         else:
             return None
 
