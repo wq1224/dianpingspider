@@ -73,13 +73,13 @@ class DianpingspiderDownloaderMiddleware(object):
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
         user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
-        # dcap = dict(DesiredCapabilities.PHANTOMJS)
-        # dcap["phantomjs.page.settings.userAgent"] = user_agent
-        # driver = webdriver.PhantomJS(desired_capabilities=dcap)
+        #dcap = dict(DesiredCapabilities.PHANTOMJS)
+        #dcap["phantomjs.page.settings.userAgent"] = user_agent
+        #driver = webdriver.PhantomJS(desired_capabilities=dcap,service_args=['--proxy=127.0.0.1:8080'])
         # driver = webdriver.Firefox()
         options = Options()
-        #options.add_argument('--headless')
-        #options.add_argument('--disable-gpu')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
         options.add_argument("--proxy-server=localhost:8080");
         driver = webdriver.Chrome(executable_path='/Users/i314017/study/scrapy/dianpingspider/chromedriver',chrome_options=options)
 
@@ -108,6 +108,7 @@ class DianpingspiderDownloaderMiddleware(object):
             #driver.save_screenshot('dianping.png')
             pdb.set_trace()
             body = self.driver.page_source
+            #body = self.driver.find_element_by_tag_name('body').get_attribute("outerHTML")
             print ("访问"+request.url)
             return HtmlResponse(self.driver.current_url, body=body, encoding='utf-8', request=request)
         else:
