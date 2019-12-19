@@ -55,4 +55,5 @@ https://www.zhihu.com/question/50738719
 https://stackoverflow.com/questions/33225947/can-a-website-detect-when-you-are-using-selenium-with-chromedriver
 
 https://intoli.com/blog/making-chrome-headless-undetectable/
+https://blog.csdn.net/Revivedsun/article/details/81785000/
 
